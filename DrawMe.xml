@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="draw" default="all">
+  
+  
+  <property file="DrawMe.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="700m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/*.hprof/**"/>
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/*.rbc/**"/>
+    <exclude name="**/*.yarb/**"/>
+    <exclude name="**/*~/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.git/**"/>
+    <exclude name="**/.hg/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/RCS/**"/>
+    <exclude name="**/SCCS/**"/>
+    <exclude name="**/__pycache__/**"/>
+    <exclude name="**/_svn/**"/>
+    <exclude name="**/rcs/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.war"/>
+    <include name="*.swc"/>
+    <include name="*.apk"/>
+    <include name="*.zip"/>
+    <include name="*.egg"/>
+    <include name="*.ane"/>
+    <include name="*.jar"/>
+    <include name="*.ear"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <exclude name="**/?*.java"/>
+    <exclude name="**/?*.form"/>
+    <exclude name="**/?*.class"/>
+    <exclude name="**/?*.groovy"/>
+    <exclude name="**/?*.scala"/>
+    <exclude name="**/?*.flex"/>
+    <exclude name="**/?*.kt"/>
+    <exclude name="**/?*.clj"/>
+  </patternset>
+  
+  <!-- JDK definitions -->
+  
+  <property name="jdk.bin.1.8" value="${jdk.home.1.8}/bin"/>
+  <path id="jdk.classpath.1.8">
+    <fileset dir="${jdk.home.1.8}">
+      <include name="jre/lib/charsets.jar"/>
+      <include name="jre/lib/deploy.jar"/>
+      <include name="jre/lib/ext/access-bridge-64.jar"/>
+      <include name="jre/lib/ext/cldrdata.jar"/>
+      <include name="jre/lib/ext/dnsns.jar"/>
+      <include name="jre/lib/ext/jaccess.jar"/>
+      <include name="jre/lib/ext/jfxrt.jar"/>
+      <include name="jre/lib/ext/localedata.jar"/>
+      <include name="jre/lib/ext/nashorn.jar"/>
+      <include name="jre/lib/ext/sunec.jar"/>
+      <include name="jre/lib/ext/sunjce_provider.jar"/>
+      <include name="jre/lib/ext/sunmscapi.jar"/>
+      <include name="jre/lib/ext/sunpkcs11.jar"/>
+      <include name="jre/lib/ext/zipfs.jar"/>
+      <include name="jre/lib/javaws.jar"/>
+      <include name="jre/lib/jce.jar"/>
+      <include name="jre/lib/jfr.jar"/>
+      <include name="jre/lib/jfxswt.jar"/>
+      <include name="jre/lib/jsse.jar"/>
+      <include name="jre/lib/management-agent.jar"/>
+      <include name="jre/lib/plugin.jar"/>
+      <include name="jre/lib/resources.jar"/>
+      <include name="jre/lib/rt.jar"/>
+    </fileset>
+  </path>
+  
+  <property name="project.jdk.home" value="${jdk.home.1.8}"/>
+  <property name="project.jdk.bin" value="${jdk.bin.1.8}"/>
+  <property name="project.jdk.classpath" value="jdk.classpath.1.8"/>
+  <!-- Register Custom Compiler Taskdefs -->
+  <property name="javac2.home" value="${idea.home}/lib"/>
+  <path id="javac2.classpath">
+    <pathelement location="${javac2.home}/javac2.jar"/>
+    <pathelement location="${javac2.home}/jdom.jar"/>
+    <pathelement location="${javac2.home}/asm-all.jar"/>
+    <pathelement location="${javac2.home}/jgoodies-forms.jar"/>
+  </path>
+  <target name="register.custom.compilers">
+    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
+    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
+  </target>
+  
+  <!-- Modules -->
+  
+  <import file="${basedir}/module_draw.xml"/>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.draw, clean.artifact.draw" description="cleanup all"/>
+  
+  <target name="build.modules" depends="init, clean, compile.module.draw" description="build all modules"/>
+  
+  <target name="init.artifacts">
+    <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
+    <property name="artifact.output.draw" value="${basedir}/out/artifacts/Draw"/>
+    <mkdir dir="${artifacts.temp.dir}"/>
+    <property name="artifact.temp.output.Draw" value="${artifacts.temp.dir}/Draw.jar"/>
+    <taskdef resource="com/sun/javafx/tools/ant/antlib.xml" uri="javafx:com.sun.javafx.tools.ant" classpath="${jdk.home.1.8}/lib/ant-javafx.jar"/>
+  </target>
+  
+  <target name="clean.artifact.draw" description="clean Draw artifact output">
+    <delete dir="${artifact.output.draw}"/>
+  </target>
+  
+  <target name="artifact.draw" depends="init.artifacts, compile.module.draw" description="Build &#39;Draw&#39; artifact" xmlns:fx="javafx:com.sun.javafx.tools.ant">
+    <mkdir dir="${artifact.output.draw}"/>
+    <copy todir="${artifact.temp.output.Draw}">
+      <fileset dir="${draw.output.dir}"/>
+    </copy>
+    <fx:fileset id="all_but_Draw" dir="${artifact.temp.output.Draw}" includes="**/*.jar">
+      <exclude name="Draw.jar"/>
+    </fx:fileset>
+    <fx:fileset id="all_Draw" dir="${artifact.temp.output.Draw}" includes="**/*.jar"/>
+    <fx:application id="Draw_id" name="Draw" mainClass="sample.DFABuilder"/>
+    <fx:jar destfile="${artifact.temp.output.Draw}\Draw.jar">
+      <fx:application refid="Draw_id"/>
+      <fileset dir="${artifact.temp.output.Draw}" excludes="**/*.jar"/>
+      <fx:resources>
+        <fx:fileset refid="all_but_Draw"/>
+      </fx:resources>
+      <manifest/>
+    </fx:jar>
+    <fx:deploy width="800" height="700" updatemode="background" outdir="${artifact.temp.output.Draw}\deploy" outfile="Draw" nativeBundles="exe">
+      <fx:permissions elevated="true"/>
+      <fx:application refid="Draw_id"/>
+      <fx:info title="DFA Builder" vendor="Arif Hosan"/>
+      <fx:resources>
+        <fx:fileset refid="all_Draw"/>
+      </fx:resources>
+    </fx:deploy>
+    <property name="artifact.sign.vendor.Draw" value="CN=Arif Hosan"/>
+    <property name="artifact.sign.alias.Draw" value="jb"/>
+    <property name="artifact.sign.keystore.Draw" value="${artifact.temp.output.Draw}\jb-key.jks"/>
+    <property name="artifact.sign.storepass.Draw" value="storepass"/>
+    <property name="artifact.sign.keypass.Draw" value="keypass"/>
+    <genkey dname="${artifact.sign.vendor.Draw}" alias="${artifact.sign.alias.Draw}" keystore="${artifact.sign.keystore.Draw}" storepass="${artifact.sign.storepass.Draw}" keypass="${artifact.sign.keypass.Draw}"/>
+    <signjar alias="${artifact.sign.alias.Draw}" keystore="${artifact.sign.keystore.Draw}" storepass="${artifact.sign.storepass.Draw}" keypass="${artifact.sign.keypass.Draw}">
+      <fileset dir="${artifact.temp.output.Draw}/deploy">
+        <include name="*.jar"/>
+      </fileset>
+    </signjar>
+    <copy todir="${artifact.output.draw}">
+      <fileset dir="${artifact.temp.output.Draw}/deploy"/>
+    </copy>
+    <delete includeemptydirs="true">
+      <fileset dir="${artifact.temp.output.Draw}"/>
+    </delete>
+  </target>
+  
+  <target name="build.all.artifacts" depends="artifact.draw" description="Build all artifacts">
+    
+    <!-- Delete temporary files -->
+    <delete dir="${artifacts.temp.dir}"/>
+  </target>
+  
+  <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
+</project>
